@@ -1,0 +1,50 @@
+[debug] [2026-02-28T09:02:30.328Z] ----------------------------------------------------------------------
+[debug] [2026-02-28T09:02:30.330Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\P.JAYASREE\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js functions:secrets:set SMS_TRIAL_MODE
+[debug] [2026-02-28T09:02:30.331Z] CLI Version:   15.5.1
+[debug] [2026-02-28T09:02:30.331Z] Platform:      win32
+[debug] [2026-02-28T09:02:30.331Z] Node Version:  v22.17.0
+[debug] [2026-02-28T09:02:30.331Z] Time:          Sat Feb 28 2026 14:32:30 GMT+0530 (India Standard Time)
+[debug] [2026-02-28T09:02:30.331Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-02-28T09:02:30.488Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[debug] [2026-02-28T09:02:30.491Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-02-28T09:02:30.491Z] > authorizing via signed-in user (jayasrip1808@gmail.com)
+[debug] [2026-02-28T09:02:30.492Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-02-28T09:02:30.492Z] > authorizing via signed-in user (jayasrip1808@gmail.com)
+[debug] [2026-02-28T09:02:30.492Z] [iam] checking project apec-no-dues for permissions ["firebase.projects.get","secretmanager.secrets.create","secretmanager.secrets.get","secretmanager.secrets.update","secretmanager.versions.add"]
+[debug] [2026-02-28T09:02:30.493Z] Checked if tokens are valid: true, expires at: 1772272033178
+[debug] [2026-02-28T09:02:30.493Z] Checked if tokens are valid: true, expires at: 1772272033178
+[debug] [2026-02-28T09:02:30.494Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/apec-no-dues:testIamPermissions [none]
+[debug] [2026-02-28T09:02:30.494Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/apec-no-dues:testIamPermissions  x-goog-user-project=apec-no-dues
+[debug] [2026-02-28T09:02:30.494Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/apec-no-dues:testIamPermissions {"permissions":["firebase.projects.get","secretmanager.secrets.create","secretmanager.secrets.get","secretmanager.secrets.update","secretmanager.versions.add"]}
+[debug] [2026-02-28T09:02:31.968Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/apec-no-dues:testIamPermissions 200
+[debug] [2026-02-28T09:02:31.969Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/apec-no-dues:testIamPermissions {"permissions":["firebase.projects.get","secretmanager.secrets.create","secretmanager.secrets.get","secretmanager.secrets.update","secretmanager.versions.add"]}
+[debug] [2026-02-28T09:02:31.970Z] Checked if tokens are valid: true, expires at: 1772272033178
+[debug] [2026-02-28T09:02:31.970Z] Checked if tokens are valid: true, expires at: 1772272033178
+[debug] [2026-02-28T09:02:31.970Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/apec-no-dues [none]
+[debug] [2026-02-28T09:02:32.332Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/apec-no-dues 200
+[debug] [2026-02-28T09:02:32.332Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/apec-no-dues {"projectNumber":"481537812306","projectId":"apec-no-dues","lifecycleState":"ACTIVE","name":"APEC-No-Dues","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2026-02-04T11:55:13.184942Z"}
+[debug] [2026-02-28T09:02:32.333Z] Checked if tokens are valid: true, expires at: 1772272033178
+[debug] [2026-02-28T09:02:32.333Z] Checked if tokens are valid: true, expires at: 1772272033178
+[debug] [2026-02-28T09:02:32.333Z] >>> [apiv2][query] GET https://secretmanager.googleapis.com/v1/projects/apec-no-dues/secrets/SMS_TRIAL_MODE [none]
+[debug] [2026-02-28T09:02:33.220Z] <<< [apiv2][status] GET https://secretmanager.googleapis.com/v1/projects/apec-no-dues/secrets/SMS_TRIAL_MODE 404
+[debug] [2026-02-28T09:02:33.220Z] <<< [apiv2][body] GET https://secretmanager.googleapis.com/v1/projects/apec-no-dues/secrets/SMS_TRIAL_MODE {"error":{"code":404,"message":"Secret [projects/481537812306/secrets/SMS_TRIAL_MODE] not found.","status":"NOT_FOUND"}}
+[debug] [2026-02-28T09:02:33.222Z] Checked if tokens are valid: true, expires at: 1772272033178
+[debug] [2026-02-28T09:02:33.222Z] Checked if tokens are valid: true, expires at: 1772272033178
+[debug] [2026-02-28T09:02:33.222Z] >>> [apiv2][query] POST https://secretmanager.googleapis.com/v1/projects/apec-no-dues/secrets secretId=SMS_TRIAL_MODE
+[debug] [2026-02-28T09:02:33.222Z] >>> [apiv2][body] POST https://secretmanager.googleapis.com/v1/projects/apec-no-dues/secrets {"name":"SMS_TRIAL_MODE","replication":{"automatic":{}},"labels":{"firebase-managed":"functions"}}
+[debug] [2026-02-28T09:02:36.216Z] <<< [apiv2][status] POST https://secretmanager.googleapis.com/v1/projects/apec-no-dues/secrets 200
+[debug] [2026-02-28T09:02:36.216Z] <<< [apiv2][body] POST https://secretmanager.googleapis.com/v1/projects/apec-no-dues/secrets {"name":"projects/481537812306/secrets/SMS_TRIAL_MODE","replication":{"automatic":{}},"createTime":"2026-02-28T09:02:33.635578Z","labels":{"firebase-managed":"functions"},"etag":"\"164bde9d6bc697\""}
+[debug] [2026-02-28T09:02:43.292Z] ExitPromptError: User force closed the prompt with SIGINT
+    at Interface.sigint (C:\Users\P.JAYASREE\AppData\Roaming\npm\node_modules\firebase-tools\node_modules\@inquirer\core\dist\commonjs\lib\create-prompt.js:101:37)
+    at Interface.emit (node:events:518:28)
+    at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1132:18)
+    at ReadStream.onkeypress (node:internal/readline/interface:271:20)
+    at ReadStream.emit (node:events:530:35)
+    at emitKeys (node:internal/readline/utils:370:14)
+    at emitKeys.next (<anonymous>)
+    at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+    at ReadStream.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+[error] 
+[error] Error: An unexpected error has occurred.
