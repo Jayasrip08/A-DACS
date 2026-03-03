@@ -44,7 +44,7 @@ class PdfService {
     );
   }
 
-  /// Builds a circular college seal for APEC.
+  /// Builds a circular college seal for A-DACS (formerly APEC).
   pw.Widget _buildSeal({double size = 80}) {
     return pw.Container(
       width: size,
@@ -83,7 +83,7 @@ class PdfService {
             pw.Positioned(
               bottom: size * 0.15,
               child: pw.Text(
-                "APEC SEAL",
+                "A-DACS SEAL",
                 style: pw.TextStyle(
                   fontSize: size * 0.08,
                   fontWeight: pw.FontWeight.bold,
@@ -119,7 +119,7 @@ class PdfService {
     String? certId,
   }) async {
     final id = certId ?? const Uuid().v4();
-    final verifyUrl = 'https://apec-no-dues.web.app/verify?id=$id';
+    final verifyUrl = 'https://a-dacs.web.app/verify?id=$id';
 
     final pdf = pw.Document();
 
@@ -133,7 +133,7 @@ class PdfService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
-              pw.Header(level: 0, child: pw.Text("ADHIPARASAKTHI ENGINEERING COLLEGE")),
+              pw.Header(level: 0, child: pw.Text("A-DACS")),
               pw.SizedBox(height: 20),
               pw.Text("DIGITAL NO-DUES CERTIFICATE", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
               pw.Text("SEMESTER $semester", style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.grey700)),

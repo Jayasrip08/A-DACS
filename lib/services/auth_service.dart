@@ -32,7 +32,7 @@ class AuthService {
            
            await _db.collection('users').doc(uid).set({
              'uid': uid,
-             'name': 'APEC ADMIN',
+             'name': 'A-DACS ADMIN',
              'email': masterEmail,
              'role': 'admin',
              'employeeId': masterEmpId,

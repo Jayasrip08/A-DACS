@@ -1,13 +1,15 @@
-# A-DACS - Project Documentation
+# Adhiparasakthi Engineering College - Digital Clearance System
+## Project Documentation
 
 ## 1. Project Overview
-**A-DACS** is a high-security, role-based mobile application designed to digitize the fee payment and "No Due Certificate" issuance workflow. The system eliminates manual paperwork, ensures financial transparency, and prevents certificate forgery.
+**Adhiparasakthi Engineering College - Digital Clearance System** is a comprehensive, role-based mobile application designed to digitize the fee payment and clearance certificate issuance workflow for Adhiparasakthi Engineering College. The system eliminates manual paperwork, ensures financial transparency, prevents certificate forgery, and automates parent-student communication through multichannel notifications.
 
 **Core Philosophy:**
 *   **Verified Access Only**: No public registration. All accounts require manual Administrative approval.
-*   **Algorithmic Verification**: Payment receipts are cross-referenced using OCR, Regex, and Scoring algorithms to detect tampering.
-*   **Tamper-Proof Certificates**: Issued certificates are cryptographically unique and publicly verifiable via QR codes.
-*   **Automated Communication**: Multichannel notifications (FCM, Email, SMS) keep parents and students informed of deadlines and statuses.
+*   **Algorithmic Verification**: Payment receipts are cross-referenced using OCR, Regex, and Probability Scoring algorithms to detect tampering and fraud.
+*   **Tamper-Proof Certificates**: Issued certificates are cryptographically unique (UUID-based) and publicly verifiable via QR codes and live database cross-reference.
+*   **Automated Communication**: Multichannel notifications (FCM Push, Email, SMS via Twilio) keep parents and students informed of deadlines, payment confirmations, and status updates.
+*   **Scalable Cloud Architecture**: Firebase backend with Node.js Cloud Functions (V2) enables 24/7 automated workflows without requiring the app to be open.
 
 ---
 
@@ -28,12 +30,17 @@
 *   **Certificate Audit**: Verifies if students in their department have successfully generated their No-Dues.
 
 ### 🛡️ Administrator (System Master)
-*   **Access Control**: Approves or Rejects all Student and Staff sign-up requests.
-*   **Infrastructure Setup**: Defines Academic Years, Semesters, Departments, and active Bank accounts.
-*   **Dynamic Fee Engine**: Creates complex fee structures targeted at specific groups (e.g., "Bus User - Batch 2022").
-*   **Payment Audit**: Reviews receipts using the **Text Tampering Detection** panel to verify data integrity.
-*   **Bulk Reminders**: Triggers automated multichannel reminders (Email + SMS) to all overdue students.
-*   **Seeding**: The system includes a self-seeding master admin (`sri17182021@gmail.com`) for bootstrap access.
+*   **Access Control**: Approves or Rejects all Student and Staff sign-up requests based on institutional records.
+*   **Infrastructure Setup**: Defines Academic Years, Semesters, Departments, Fee Categories, and active Bank accounts for verification.
+*   **Dynamic Fee Engine**: Creates complex, targeted fee structures for specific student groups (e.g., "Bus User - Batch 2022", "Hosteller - Management Quota").
+*   **Payment Audit**: Reviews receipts using the **Text Tampering Detection** panel to verify data integrity and prevent fraudulent submissions.
+*   **Bulk Communications**: Triggers automated multichannel reminders (Email + SMS) to all overdue students with personalized messages.
+*   **Financial Reporting**: Exports comprehensive audit trails and financial statements for institutional records and compliance.
+*   **System Bootstrap**: The system auto-creates a master admin account on first run with the following credentials:
+    *   **Email**: `sri17182021@gmail.com`
+    *   **Default Password**: `ApecAdmin@2026` (must be changed after first login)
+    *   **Employee ID**: `420422205001`
+    *   **Status**: Auto-approved
 
 ---
 
@@ -110,16 +117,53 @@ The backend logic is powered by **Firebase Cloud Functions (V2)**, which provide
 
 ---
 
-## 6. Technical Stack
+## 7. Getting Started & Deployment
 
-| Component | Technology | Description |
-| :--- | :--- | :--- |
-| **Logic** | **Flutter (Dart) 3.x** | Cross-platform frontend logic. |
-| **Backend** | **Firebase** | Firestore (DB), Storage (Files), Auth (Users). |
-| **Serverless** | **Node.js Cloud Functions** | Automated scheduling and SMS triggering. |
-| **SMS** | **Twilio API** | Global SMS gateway for parent alerts. |
-| **OCR** | **Google ML Kit** | High-speed on-device text recognition. |
-| **Verification** | **UUID & QR Code** | Forgery-proof certificate system. |
+### Prerequisites
+- Flutter SDK (3.10.7 or higher)
+- Firebase CLI
+- Node.js 18+
+- Twilio Account (for SMS)
+- Google Cloud Project with ML Kit enabled
+
+### Quick Start
+```bash
+# Clone repository
+git clone https://github.com/Jayasrip08/A-DACS.git
+cd apec_no_dues
+
+# Install dependencies
+flutter pub get
+cd functions && npm install && cd ..
+
+# Configure Firebase
+firebase login
+flutterfire configure
+
+# Set up secrets for Cloud Functions
+firebase functions:secrets:set TWILIO_ACCOUNT_SID
+firebase functions:secrets:set TWILIO_AUTH_TOKEN
+firebase functions:secrets:set TWILIO_PHONE_NUMBER
+
+# Deploy
+firebase deploy
+
+# Run locally
+flutter run -d chrome  # Web
+flutter run -d android # Android
+```
+
+### System Bootstrap
+The system auto-creates a master admin account on first initialization:
+- **Email**: `sri17182021@gmail.com`
+- **Default Password**: `ApecAdmin@2026` (must be changed after first login)
+- **Employee ID**: `420422205001`
+
+Students and staff must register separately and await admin approval before gaining system access.
 
 ---
-**A-DACS Development Team | 2026**
+
+**Adhiparasakthi Engineering College - Digital Clearance System**  
+Development Team | 2026  
+**Repository**: https://github.com/Jayasrip08/A-DACS  
+**Institution**: Adhiparasakthi Engineering College, Tamil Nadu, India

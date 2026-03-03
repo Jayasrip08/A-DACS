@@ -1,6 +1,6 @@
 {
-    "name": "apec_no_dues",
-    "short_name": "apec_no_dues",
+    "name": "A-DACS",
+    "short_name": "A-DACS",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

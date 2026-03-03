@@ -19,6 +19,64 @@ const smsService = require("./sms_service.js"); // NEW
 // Initialize Firebase Admin
 admin.initializeApp();
 
+// helper to count unread notifications for a user
+async function getUnreadCount(userId) {
+  if (!userId) return 0;
+  try {
+    const snap = await admin.firestore()
+      .collection('notifications')
+      .where('userId', '==', userId)
+      .where('read', '==', false)
+      .count()
+      .get();
+    return snap.count || 0;
+  } catch (err) {
+    logger.error('Error fetching unread count for', userId, err);
+    return 0;
+  }
+}
+
+// helper to send FCM message and log it to Firestore with badge count
+// messagePayload should include notification, data, android, etc. but not
+// token.  The function will add the token and badge fields, write the log,
+// and return the FCM response string.
+async function sendUserNotification(userId, fcmToken, messagePayload) {
+  const db = admin.firestore();
+
+  // first create log entry (without fcmMessageId)
+  const logDoc = await db.collection('notifications').add({
+    userId,
+    type: messagePayload.data?.type || '',
+    title: messagePayload.notification?.title || '',
+    body: messagePayload.notification?.body || '',
+    data: messagePayload.data || {},
+    sentAt: admin.firestore.FieldValue.serverTimestamp(),
+    read: false,
+  });
+
+  // recalc unread count now that the new document exists
+  const count = await getUnreadCount(userId);
+
+  // attach badge info to payload for both iOS and Android
+  messagePayload.android = messagePayload.android || {};
+  messagePayload.android.notification = messagePayload.android.notification || {};
+  messagePayload.android.notification.number = count;
+
+  messagePayload.apns = messagePayload.apns || {};
+  messagePayload.apns.payload = messagePayload.apns.payload || {};
+  messagePayload.apns.payload.aps = messagePayload.apns.payload.aps || {};
+  messagePayload.apns.payload.aps.badge = count;
+
+  // send the note
+  const fullMessage = {token: fcmToken, ...messagePayload};
+  const response = await admin.messaging().send(fullMessage);
+
+  // update log with the FCM message id
+  await logDoc.update({ fcmMessageId: response });
+
+  return response;
+}
+
 // Set global options for all functions
 setGlobalOptions({
   maxInstances: 10,
@@ -235,8 +293,7 @@ async function sendRemindersForFeeStructure(
       const title = "⚠️ Fee Payment Reminder";
       const body = `Your fee payment deadline is in ${daysUntilDeadline} day(s). Amount due: ₹${outstandingAmount}`;
 
-      const message = {
-        token: fcmToken,
+      const baseMessage = {
         notification: {
           title: title,
           body: body,
@@ -257,8 +314,8 @@ async function sendRemindersForFeeStructure(
       };
 
       try {
-        // Send FCM notification
-        const response = await admin.messaging().send(message);
+        // write log, calculate badge count and send via helper
+        const response = await sendUserNotification(userDoc.id, fcmToken, baseMessage);
         logger.info(`Notification sent to ${userData.email}: ${response}`);
 
         // Send SMS to parent if phone exists
@@ -270,18 +327,6 @@ async function sendRemindersForFeeStructure(
             deadlineText,
           );
         }
-
-        // Log notification in Firestore
-        await db.collection("notifications").add({
-          userId: userDoc.id,
-          type: "payment_reminder",
-          title: title,
-          body: body,
-          data: message.data,
-          sentAt: admin.firestore.FieldValue.serverTimestamp(),
-          read: false,
-          fcmMessageId: response,
-        });
       } catch (error) {
         logger.error(`Failed to send notification to ${userData.email}:`, error);
       }
@@ -351,8 +396,7 @@ exports.onPaymentStatusChangeV2 = onDocumentUpdated({
       return null;
     }
 
-    const message = {
-      token: fcmToken,
+    const baseMessage = {
       notification: {
         title: title,
         body: body,
@@ -372,21 +416,8 @@ exports.onPaymentStatusChangeV2 = onDocumentUpdated({
       },
     };
 
-    // Send FCM notification
-    const response = await admin.messaging().send(message);
+    const response = await sendUserNotification(after.studentId, fcmToken, baseMessage);
     logger.info(`Status change notification sent to ${studentData.email}: ${response}`);
-
-    // Log notification in Firestore
-    await db.collection("notifications").add({
-      userId: after.studentId,
-      type: notificationType,
-      title: title,
-      body: body,
-      data: message.data,
-      sentAt: admin.firestore.FieldValue.serverTimestamp(),
-      read: false,
-      fcmMessageId: response,
-    });
 
     // Send Email notification
     await emailService.sendPaymentStatusEmail(after, studentData.email, studentData.name);
@@ -450,8 +481,7 @@ exports.onUserCreated = onDocumentUpdated({
   if (!before.fcmToken && after.fcmToken && after.role === "student") {
     const db = admin.firestore();
 
-    const message = {
-      token: after.fcmToken,
+    const baseMessage = {
       notification: {
         title: "Welcome to A-DACS",
         body: `Hello ${after.name}! You can now manage your fee payments digitally.`,
@@ -462,18 +492,8 @@ exports.onUserCreated = onDocumentUpdated({
     };
 
     try {
-      await admin.messaging().send(message);
+      const response = await sendUserNotification(event.params.userId, after.fcmToken, baseMessage);
       logger.info(`Welcome notification sent to ${after.email}`);
-
-      // Log notification
-      await db.collection("notifications").add({
-        userId: event.params.userId,
-        type: "welcome",
-        title: message.notification.title,
-        body: message.notification.body,
-        sentAt: admin.firestore.FieldValue.serverTimestamp(),
-        read: false,
-      });
     } catch (error) {
       logger.error(`Failed to send welcome notification:`, error);
     }
@@ -507,8 +527,7 @@ exports.onPaymentCreated = onDocumentCreated({
     for (const staffDoc of staffSnapshot.docs) {
       const staffData = staffDoc.data();
       if (staffData.fcmToken) {
-        const message = {
-          token: staffData.fcmToken,
+        const baseMessage = {
           notification: { title, body },
           data: {
             type: "new_payment",
@@ -516,18 +535,8 @@ exports.onPaymentCreated = onDocumentCreated({
             studentId: paymentData.studentId,
           },
         };
-        notifications.push(admin.messaging().send(message));
-
-        // Add to notifications collection for the staff member
-        notifications.push(db.collection("notifications").add({
-          userId: staffDoc.id,
-          type: "new_payment",
-          title,
-          body,
-          data: message.data,
-          sentAt: admin.firestore.FieldValue.serverTimestamp(),
-          read: false,
-        }));
+        // sendUserNotification handles log + badge count
+        notifications.push(sendUserNotification(staffDoc.id, staffData.fcmToken, baseMessage));
       }
     }
     await Promise.all(notifications);
@@ -599,25 +608,14 @@ exports.onNewRegistration = onDocumentCreated({
     for (const adminDoc of adminSnapshot.docs) {
       const adminData = adminDoc.data();
       if (adminData.fcmToken) {
-        const message = {
-          token: adminData.fcmToken,
+        const baseMessage = {
           notification: { title, body },
           data: {
             type: "new_registration",
             userId: event.params.userId,
           },
         };
-        notifications.push(admin.messaging().send(message));
-
-        notifications.push(db.collection("notifications").add({
-          userId: adminDoc.id,
-          type: "new_registration",
-          title,
-          body,
-          data: message.data,
-          sentAt: admin.firestore.FieldValue.serverTimestamp(),
-          read: false,
-        }));
+        notifications.push(sendUserNotification(adminDoc.id, adminData.fcmToken, baseMessage));
       }
     }
     await Promise.all(notifications);
@@ -671,8 +669,7 @@ exports.onNoDueStatusChange = onDocumentUpdated({
       return null;
     }
 
-    const message = {
-      token: userData.fcmToken,
+    const baseMessage = {
       notification: { title, body },
       data: {
         type: type,
@@ -680,17 +677,7 @@ exports.onNoDueStatusChange = onDocumentUpdated({
       },
     };
 
-    await admin.messaging().send(message);
-
-    // Log to notifications collection
-    await db.collection("notifications").add({
-      userId: userId,
-      type: type,
-      title,
-      body,
-      sentAt: admin.firestore.FieldValue.serverTimestamp(),
-      read: false,
-    });
+    await sendUserNotification(userId, userData.fcmToken, baseMessage);
 
   } catch (error) {
     logger.error("Error in onNoDueStatusChange:", error);

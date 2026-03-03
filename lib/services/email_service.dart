@@ -20,10 +20,10 @@ This is a reminder that your Semester $semester fee payment was due on ${_format
 
 Outstanding Amount: ₹${dueAmount.toStringAsFixed(0)}
 
-Please submit your payment proof at your earliest convenience through the APEC No-Dues portal.
+Please submit your payment proof at your earliest convenience through the A-DACS portal.
 
 Thank you,
-APEC Administration
+A-DACS Administration
 ''';
 
       final htmlBody = '''
@@ -48,10 +48,10 @@ APEC Administration
       <p>Dear <strong>$studentName</strong>,</p>
       <p>This is a reminder that your <strong>Semester $semester</strong> fee payment was due on <strong>${_formatDate(deadline)}</strong>.</p>
       <p>Outstanding Amount: <span class="amount">₹${dueAmount.toStringAsFixed(0)}</span></p>
-      <p>Please submit your payment proof at your earliest convenience through the APEC No-Dues portal.</p>
+      <p>Please submit your payment proof at your earliest convenience through the A-DACS portal.</p>
     </div>
     <div class="footer">
-      <p>Thank you,<br>APEC Administration</p>
+      <p>Thank you,<br>A-DACS Administration</p>
     </div>
   </div>
 </body>

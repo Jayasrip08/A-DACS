@@ -47,18 +47,49 @@ void main() async {
   runApp(const ADACSApp());
 }
 
-class ADACSApp extends StatelessWidget {
+class ADACSApp extends StatefulWidget {
   const ADACSApp({super.key});
+
+  @override
+  State<ADACSApp> createState() => _ADACSAppState();
+}
+
+class _ADACSAppState extends State<ADACSApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Update badge count on app launch (after a short delay so auth resolves)
+    Future.delayed(const Duration(seconds: 2), () async {
+      await NotificationService().updateAppBadge();
+      // also fire a launch notification so the shade shows our app name/text
+      await NotificationService().showLaunchNotification();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Refresh badge count every time user brings the app back to foreground
+    if (state == AppLifecycleState.resumed) {
+      NotificationService().updateAppBadge();
+      NotificationService().showLaunchNotification();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'A-DACS',
       debugShowCheckedModeBanner: false,
-      navigatorKey: navigatorKey, // SET NAVIGATOR KEY
-      scaffoldMessengerKey: messengerKey, // SET GLOBAL KEY
+      navigatorKey: navigatorKey,
+      scaffoldMessengerKey: messengerKey,
       theme: ThemeData(
-
         primarySwatch: Colors.indigo,
         scaffoldBackgroundColor: Colors.grey[50],
         appBarTheme: const AppBarTheme(
@@ -80,7 +111,6 @@ class ADACSApp extends StatelessWidget {
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
       ),
-      // Check Auth State on App Start (via Splash)
       home: const SplashScreen(),
       onGenerateRoute: (settings) {
         final uri = Uri.tryParse(settings.name ?? '');
@@ -173,6 +203,9 @@ class RoleResolver extends StatelessWidget {
         // Data Loaded -> Check Role
         final data = snapshot.data!.data() as Map<String, dynamic>;
         final String role = data['role'] ?? 'student';
+
+        // Update app icon badge count now that we know who is logged in
+        NotificationService().updateAppBadge();
 
         if (role == 'admin') {
           return const AdminDashboard();

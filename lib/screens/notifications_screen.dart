@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../widgets/ux_widgets.dart';
+import '../services/notification_service.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -22,6 +23,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   void initState() {
     super.initState();
     _userId = FirebaseAuth.instance.currentUser?.uid;
+    // Clear system badge count when user opens the notifications screen
+    NotificationService().clearAppBadge();
   }
 
   // ── Selection helpers ───────────────────────────────────────────────────────
@@ -75,6 +78,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           FirebaseFirestore.instance.collection('notifications').doc(id));
     }
     await batch.commit();
+    // update launcher badge
+    NotificationService().updateAppBadge();
   }
 
   Future<void> _deleteOne(String docId) async {
@@ -82,6 +87,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         .collection('notifications')
         .doc(docId)
         .delete();
+    NotificationService().updateAppBadge();
   }
 
   Future<void> _markAllAsRead(String userId) async {
@@ -95,6 +101,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       batch.update(doc.reference, {'read': true});
     }
     await batch.commit();
+    NotificationService().updateAppBadge();
   }
 
   Future<void> _deleteAllNotifications(String userId) async {
@@ -107,6 +114,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       batch.delete(doc.reference);
     }
     await batch.commit();
+    NotificationService().updateAppBadge();
   }
 
   Future<void> _confirmDeleteAll(BuildContext context, String userId) async {
@@ -364,9 +372,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   .collection('notifications')
                   .doc(doc.id)
                   .update({'read': true});
+              // badge should reflect new unread count
+              NotificationService().updateAppBadge();
             }
           }
         },
+
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           color: isSelected

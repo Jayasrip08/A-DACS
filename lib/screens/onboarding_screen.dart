@@ -15,7 +15,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<Map<String, String>> _onboardingData = [
     {
-      "title": "Welcome to APEC No-Dues",
+      "title": "Welcome to A-DACS",
       "text": "The fastest way to clear your dues digitally. No more running around with forms!",
       "image": "assets/images/intro1.png" // Placeholder, will use Icons
     },

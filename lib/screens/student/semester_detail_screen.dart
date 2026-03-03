@@ -198,7 +198,7 @@ class _SemesterDetailScreenState extends State<SemesterDetailScreen> {
         'generatedCount': 1,
         'status': 'issued',
         'certId': certId,
-        'verifyUrl': 'https://apec-no-dues.web.app/verify?id=$certId',
+        'verifyUrl': 'https://a-dacs.web.app/verify?id=$certId',
         'studentName': widget.userData['name'] ?? '',
         'regNo': widget.userData['regNo'] ?? '',
         'dept': widget.userData['dept'] ?? '',

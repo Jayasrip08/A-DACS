@@ -4,8 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'staff_student_detail.dart';
 import '../profile_screen.dart';
 import '../../services/pdf_service.dart';
-import '../notifications_screen.dart';
-import '../../widgets/notification_badge.dart'; // Import NotificationBadge
 
 class StaffDashboard extends StatefulWidget {
   const StaffDashboard({super.key});
@@ -432,13 +430,6 @@ class _StaffDashboardState extends State<StaffDashboard> {
             tooltip: _isSelectionMode ? "Download Selected" : "Download Report",
           ),
           if (!_isSelectionMode) ...[
-            NotificationBadge(
-              child: const Icon(Icons.notifications),
-              onTap: () {
-                 Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
-              },
-            ),
-
             IconButton(
               icon: const Icon(Icons.person_outline),
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())),

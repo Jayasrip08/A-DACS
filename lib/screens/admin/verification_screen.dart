@@ -173,13 +173,112 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     const SizedBox(height: 15),
                     
                     _detailRow(Icons.person, "Student: $studentName"),
+                    _detailRow(Icons.badge,
+                        "Reg No: ${widget.data['studentRegNo'] ?? widget.data['ocr']?['studentRegNoGroundTruth'] ?? 'N/A'}",
+                        color: Colors.indigo[700]),
                     _detailRow(Icons.category, "Fee Type: ${widget.data['feeType'] ?? 'Fee'}"),
                     _detailRow(Icons.school, "Semester: $semester"),
                     _detailRow(Icons.receipt, "TXN ID: $transactionId"),
-                    if (widget.data['walletUsedAmount'] != null && (widget.data['walletUsedAmount'] as num) > 0)
-                       _detailRow(Icons.account_balance_wallet, "Wallet Applied: ₹${(widget.data['walletUsedAmount'] as num).toStringAsFixed(0)}", color: Colors.green),
+                    _detailRow(Icons.payment,
+                        "Mode: ${(widget.data['paymentMode'] ?? 'upi').toString().toUpperCase()}"),
+                    if (widget.data['walletUsedAmount'] != null &&
+                        (widget.data['walletUsedAmount'] as num) > 0)
+                      _detailRow(Icons.account_balance_wallet,
+                          "Wallet Applied: ₹${(widget.data['walletUsedAmount'] as num).toStringAsFixed(0)}",
+                          color: Colors.green),
                     if (widget.data['isInstallment'] == true)
-                       _detailRow(Icons.splitscreen, "Plan: Installment ${widget.data['installmentNumber']} of 2", color: Colors.blue),
+                      _detailRow(Icons.splitscreen,
+                          "Plan: Installment ${widget.data['installmentNumber']} of 2",
+                          color: Colors.blue),
+
+                    // ── OCR Audit Trail ──────────────────────────
+                    if (widget.data['ocr'] != null) ...() {
+                      final ocr = widget.data['ocr'] as Map<String, dynamic>;
+                      final original = ocr['original'] as Map<String, dynamic>? ?? {};
+                      final submitted = ocr['submitted'] as Map<String, dynamic>? ?? {};
+                      final edited = ocr['edited'] as Map<String, dynamic>? ?? {};
+                      final ocrVerified = ocr['verified'] == true;
+                      final ocrRan = ocr['ran'] == true;
+
+                      return [
+                        const Divider(height: 20),
+                        Row(
+                          children: [
+                            Icon(
+                              ocrVerified ? Icons.verified : Icons.edit_note,
+                              size: 16,
+                              color: ocrVerified ? Colors.green[700] : Colors.orange[700],
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              ocrRan
+                                  ? (ocrVerified
+                                      ? "OCR Verified — student did not edit any fields"
+                                      : "OCR fields were edited by student")
+                                  : "OCR was not run",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: ocrVerified
+                                      ? Colors.green[700]
+                                      : Colors.orange[800]),
+                            ),
+                          ],
+                        ),
+                        if (ocrRan) ...() {
+                          final rows = <Widget>[];
+                          void addRow(String field, String label) {
+                            final orig = original[field]?.toString();
+                            final sub = submitted[field]?.toString();
+                            final wasEdited = edited[field] == true;
+                            if (orig == null && sub == null) return;
+                            rows.add(Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: 100,
+                                    child: Text(label,
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.black54)),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        if (orig != null)
+                                          Text("OCR: $orig",
+                                              style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: wasEdited
+                                                      ? Colors.red[700]
+                                                      : Colors.green[700])),
+                                        if (wasEdited && sub != null)
+                                          Text("Submitted: $sub",
+                                              style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  ),
+                                  if (wasEdited)
+                                    const Icon(Icons.edit, size: 14, color: Colors.orange),
+                                ],
+                              ),
+                            ));
+                          }
+
+                          addRow('transactionId', 'TXN / DD No');
+                          addRow('amount', 'Amount');
+                          addRow('date', 'Date');
+                          addRow('regNo', 'Reg No');
+                          return rows;
+                        }(),
+                      ];
+                    }(),
                     
                     const Divider(height: 30),
                     

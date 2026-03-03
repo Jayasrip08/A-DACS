@@ -262,14 +262,18 @@ class FeeService {
       double surplus = 0.0;
       double walletUsed = (paymentData['walletUsedAmount'] as num?)?.toDouble() ?? 0.0;
       double pocketAmount = (paymentData['amountPaid'] as num?)?.toDouble() ?? 0.0;
-      double expectedTotal = (paymentData['amountExpected'] as num?)?.toDouble() ?? 0.0;
+      // Use fullFeeAmount (original total fee) for surplus calculation.
+      // amountExpected is now the net cash expected (fee - wallet), so we read
+      // fullFeeAmount stored in the enrichment; fall back gracefully for old records.
+      double fullFee = (paymentData['fullFeeAmount'] as num?)?.toDouble()
+          ?? ((paymentData['amountExpected'] as num?)?.toDouble() ?? 0.0) + walletUsed;
       
       if (isApproved) {
         // Fetch installments if approved to check for surplus
         String sem = paymentData['semester'] ?? '';
         String qType = (paymentData['feeType'] ?? '').toString().replaceAll(" ", "_");
         String p1Id = "${studentId}_${sem}_$qType";
-        String p2Id = "${studentId}_${sem}_$qType" + "_inst2";
+        String p2Id = "${studentId}_${sem}_${qType}_inst2";
         
         DocumentSnapshot s1 = await transaction.get(_db.collection('payments').doc(p1Id));
         DocumentSnapshot s2 = await transaction.get(_db.collection('payments').doc(p2Id));
@@ -287,15 +291,17 @@ class FeeService {
            totalSubmittedValue += (pocketAmount + walletUsed);
         }
 
-        if (totalSubmittedValue > expectedTotal) {
+        // Compare against the full original fee (not the net cash amount after wallet)
+        if (totalSubmittedValue > fullFee) {
            double previousTotal = totalSubmittedValue - (pocketAmount + walletUsed);
-           if (previousTotal >= expectedTotal) {
+           if (previousTotal >= fullFee) {
               surplus = (pocketAmount + walletUsed);
            } else {
-              surplus = totalSubmittedValue - expectedTotal;
+              surplus = totalSubmittedValue - fullFee;
            }
         }
       }
+
 
       // 3. All Updates (Writes must follow all reads)
       transaction.update(paymentRef, {
